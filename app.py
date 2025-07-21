@@ -64,14 +64,23 @@ st.image(str(img_path), use_container_width=True)
 
 antwoord = st.radio("Wat is het ras?", vraag["opties"], key=f"vraag_{st.session_state.vraag}")
 
-if st.button("Controleer"):
-    if antwoord == vraag["juist"]:
-        st.success("✅ Goed!")
-        st.session_state.score += 1
-    else:
-        st.error(f"❌ Fout! Het juiste antwoord was: **{vraag['juist']}**")
+if f"beantwoord_{st.session_state.vraag}" not in st.session_state:
+    if st.button("Controleer"):
+        st.session_state[f"beantwoord_{st.session_state.vraag}"] = antwoord
+        if antwoord == vraag["juist"]:
+            st.session_state.score += 1
+        st.experimental_rerun()
 
-    st.session_state.resultaat = True
+elif f"beantwoord_{st.session_state.vraag}" in st.session_state:
+    gegeven = st.session_state[f"beantwoord_{st.session_state.vraag}"]
+    juist = vraag["juist"]
+    if gegeven == juist:
+        st.success("✅ Goed!")
+    else:
+        st.error(f"❌ Fout! Het juiste antwoord was: **{juist}**")
+
+    time.sleep(1.5)
+    st.session_state.vraag += 1
     st.experimental_rerun()
 
 # Na feedback, wacht 1.5 sec en ga door naar volgende vraag
