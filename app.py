@@ -86,29 +86,31 @@ st.title("🐶 Raad het hondenras")
 st.write(f"Vraag {vraag_index + 1} van 10")
 st.image(str(img_path), use_container_width=True)
 
-antwoord = st.radio("Wat is het ras?", vraag["opties"], key=f"antwoord_{vraag_index}")
+antwoord = st.radio("Wat is het ras?", vraag["opties"], key=f"radio_{vraag_index}")
 
-# --- Feedback tonen indien reeds beantwoord ---
-if f"antwoord_{vraag_index}_gekozen" in st.session_state:
-    gekozen = st.session_state[f"antwoord_{vraag_index}_gekozen"]
-    juist = vraag["juist"]
-
-    if gekozen == juist:
-        st.success("✅ Goed!")
-    else:
-        st.error(f"❌ Fout! Het juiste antwoord was: **{juist}**")
-
-    # Check tijdsverschil
-    tijdstip = datetime.fromisoformat(st.session_state.feedback_tijd)
-    if datetime.now() - tijdstip > timedelta(seconds=1.5):
-        st.session_state.vraag += 1
+# --- Vraag nog niet beantwoord ---
+if f"gekozen_{vraag_index}" not in st.session_state:
+    if st.button("Controleer"):
+        st.session_state[f"gekozen_{vraag_index}"] = antwoord
+        st.session_state[f"tijd_{vraag_index}"] = datetime.now().isoformat()
+        if antwoord == vraag["juist"]:
+            st.session_state.score += 1
         st.experimental_rerun()
     st.stop()
 
-# --- Knop: Controleer ---
-if st.button("Controleer"):
-    st.session_state[f"antwoord_{vraag_index}_gekozen"] = antwoord
-    if antwoord == vraag["juist"]:
-        st.session_state.score += 1
-    st.session_state.feedback_tijd = datetime.now().isoformat()
+# --- Feedback tonen ---
+gekozen = st.session_state[f"gekozen_{vraag_index}"]
+juist = vraag["juist"]
+
+if gekozen == juist:
+    st.success("✅ Goed!")
+else:
+    st.error(f"❌ Fout! Het juiste antwoord was: **{juist}**")
+
+# --- Ga pas na 1.5s door ---
+tijdstip = datetime.fromisoformat(st.session_state[f"tijd_{vraag_index}"])
+if datetime.now() - tijdstip > timedelta(seconds=1.5):
+    st.session_state.vraag += 1
     st.experimental_rerun()
+else:
+    st.stop()
