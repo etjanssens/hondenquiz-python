@@ -55,6 +55,7 @@ if "quiz" not in st.session_state:
     st.session_state.quiz = maak_quiz()
     st.session_state.vraag = 0
     st.session_state.score = 0
+    st.session_state.feedback_tijd = None
 
 # --- Einde quiz ---
 if st.session_state.vraag >= len(st.session_state.quiz):
@@ -72,12 +73,11 @@ if st.session_state.vraag >= len(st.session_state.quiz):
         st.error("🐾 Tijd om wat meer hondenrassen te leren kennen!")
 
     if st.button("Speel opnieuw"):
-        for key in list(st.session_state.keys()):
-            del st.session_state[key]
+        st.session_state.clear()
         st.experimental_rerun()
     st.stop()
 
-# --- Toon huidige vraag ---
+# --- Huidige vraag ophalen ---
 vraag_index = st.session_state.vraag
 vraag = st.session_state.quiz[vraag_index]
 img_path = Path(__file__).parent / "images" / vraag["foto"]
@@ -88,29 +88,27 @@ st.image(str(img_path), use_container_width=True)
 
 antwoord = st.radio("Wat is het ras?", vraag["opties"], key=f"antwoord_{vraag_index}")
 
-# --- Knop: Controleer antwoord ---
-if f"antwoord_ingediend_{vraag_index}" not in st.session_state:
-    if st.button("Controleer"):
-        st.session_state[f"antwoord_ingediend_{vraag_index}"] = True
-        st.session_state[f"antwoord_gekozen_{vraag_index}"] = antwoord
-        st.session_state[f"tijdstip_{vraag_index}"] = datetime.now().isoformat()
-        if antwoord == vraag["juist"]:
-            st.session_state.score += 1
-st.experimental_rerun()
-st.stop()
+# --- Feedback tonen indien reeds beantwoord ---
+if f"antwoord_{vraag_index}_gekozen" in st.session_state:
+    gekozen = st.session_state[f"antwoord_{vraag_index}_gekozen"]
+    juist = vraag["juist"]
 
-# --- Feedback tonen ---
-gekozen = st.session_state[f"antwoord_gekozen_{vraag_index}"]
-juist = vraag["juist"]
-if gekozen == juist:
-    st.success("✅ Goed!")
-else:
-    st.error(f"❌ Fout! Het juiste antwoord was: **{juist}**")
+    if gekozen == juist:
+        st.success("✅ Goed!")
+    else:
+        st.error(f"❌ Fout! Het juiste antwoord was: **{juist}**")
 
-# --- Automatisch doorgaan na 1.5 seconde ---
-tijdstip = datetime.fromisoformat(st.session_state[f"tijdstip_{vraag_index}"])
-if datetime.now() - tijdstip > timedelta(seconds=1.5):
-    st.session_state.vraag += 1
+    # Check tijdsverschil
+    tijdstip = datetime.fromisoformat(st.session_state.feedback_tijd)
+    if datetime.now() - tijdstip > timedelta(seconds=1.5):
+        st.session_state.vraag += 1
+        st.experimental_rerun()
+    st.stop()
+
+# --- Knop: Controleer ---
+if st.button("Controleer"):
+    st.session_state[f"antwoord_{vraag_index}_gekozen"] = antwoord
+    if antwoord == vraag["juist"]:
+        st.session_state.score += 1
+    st.session_state.feedback_tijd = datetime.now().isoformat()
     st.experimental_rerun()
-
-# (Let op: géén elif of verdere code na deze if-blok!)
