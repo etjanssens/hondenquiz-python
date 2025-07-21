@@ -6,7 +6,50 @@ from PIL import Image
 
 st.set_page_config(page_title="Hondenrassenquiz 🐶", layout="centered")
 
-# --- Veilig: initialiseervangnet ---
+# --- Quiz genereren ---
+def maak_quiz():
+    RASSEN = {
+        "akita.jpg": "Akita Inu",
+        "appenzeller.jpeg": "Appenzeller",
+        "beagle.jpeg": "Beagle",
+        "bernersennen.jpg": "Berner Sennen",
+        "bichonfrise.jpg": "Bichon Frisé",
+        "bordercollie.jpg": "Border Collie",
+        "bostonterrier.jpeg": "Boston Terriër",
+        "chihuahua.jpg": "Chihuahua",
+        "cockerspaniel.jpg": "Cocker Spaniël",
+        "dalmatier.jpg": "Dalmatiër",
+        "dobermann.jpg": "Dobermann",
+        "duitsedog.jpg": "Duitse Dog",
+        "duitseherder.jpeg": "Duitse Herder",
+        "engelsebulldog.jpg": "Engelse Bulldog",
+        "fransebulldog.jpeg": "Franse Bulldog",
+        "goldenretriever.jpg": "Golden Retriever",
+        "husky.jpg": "Husky",
+        "jackrussel.jpg": "Jack Russel",
+        "labrador.jpg": "Labrador",
+        "maltezer.jpg": "Maltezer",
+        "poedel.jpg": "Poedel",
+        "rottweiler.jpg": "Rottweiler",
+        "shetlandsheepdog.jpeg": "Shetland Sheepdog",
+        "shitzu.jpeg": "Shih Tzu",
+        "sintbernard.jpg": "Sint Bernard",
+        "staffordshirebulterrier.jpg": "Staffordshire Bull Terriër",
+        "teckel.jpg": "Teckel",
+        "whippet.jpg": "Whippet"
+    }
+
+    items = list(RASSEN.items())
+    random.shuffle(items)
+    quiz = []
+    for foto, juist in items[:10]:
+        opties = random.sample([v for v in RASSEN.values() if v != juist], 3)
+        opties.append(juist)
+        random.shuffle(opties)
+        quiz.append({"foto": foto, "juist": juist, "opties": opties})
+    return quiz
+
+# --- Initialisatie bij eerste run ---
 if "quiz" not in st.session_state:
     st.session_state.quiz = maak_quiz()
     st.session_state.vraag = 0
@@ -30,62 +73,6 @@ if st.session_state.get("door_naar_volgende"):
     st.session_state.vraag += 1
     st.rerun()
 
-# --- Hondenrassen ---
-RASSEN = {
-    "akita.jpg": "Akita Inu",
-    "appenzeller.jpeg": "Appenzeller",
-    "beagle.jpeg": "Beagle",
-    "bernersennen.jpg": "Berner Sennen",
-    "bichonfrise.jpg": "Bichon Frisé",
-    "bordercollie.jpg": "Border Collie",
-    "bostonterrier.jpeg": "Boston Terriër",
-    "chihuahua.jpg": "Chihuahua",
-    "cockerspaniel.jpg": "Cocker Spaniël",
-    "dalmatier.jpg": "Dalmatiër",
-    "dobermann.jpg": "Dobermann",
-    "duitsedog.jpg": "Duitse Dog",
-    "duitseherder.jpeg": "Duitse Herder",
-    "engelsebulldog.jpg": "Engelse Bulldog",
-    "fransebulldog.jpeg": "Franse Bulldog",
-    "goldenretriever.jpg": "Golden Retriever",
-    "husky.jpg": "Husky",
-    "jackrussel.jpg": "Jack Russel",
-    "labrador.jpg": "Labrador",
-    "maltezer.jpg": "Maltezer",
-    "poedel.jpg": "Poedel",
-    "rottweiler.jpg": "Rottweiler",
-    "shetlandsheepdog.jpeg": "Shetland Sheepdog",
-    "shitzu.jpeg": "Shih Tzu",
-    "sintbernard.jpg": "Sint Bernard",
-    "staffordshirebulterrier.jpg": "Staffordshire Bull Terriër",
-    "teckel.jpg": "Teckel",
-    "whippet.jpg": "Whippet"
-}
-
-# --- Quiz genereren (alleen bij eerste run) ---
-def maak_quiz():
-    items = list(RASSEN.items())
-    random.shuffle(items)
-    quiz = []
-    for foto, juist in items[:10]:
-        opties = random.sample([v for v in RASSEN.values() if v != juist], 3)
-        opties.append(juist)
-        random.shuffle(opties)
-        quiz.append({"foto": foto, "juist": juist, "opties": opties})
-    return quiz
-
-# --- Eerste initialisatie ---
-if not st.session_state.quiz:
-    st.session_state.quiz = maak_quiz()
-    st.session_state.vraag = 0
-    st.session_state.score = 0
-    st.session_state.gekozen = {}
-    st.session_state.tijden = {}
-    st.session_state.door_naar_volgende = False
-    st.session_state.door_naar_feedback = False
-    st.session_state.gekozen_juist = False
-    st.rerun()
-
 # --- Einde quiz ---
 if st.session_state.vraag >= len(st.session_state.quiz):
     st.header("🎉 Je bent klaar!")
@@ -106,7 +93,7 @@ if st.session_state.vraag >= len(st.session_state.quiz):
         st.rerun()
     st.stop()
 
-# --- Huidige vraag ---
+# --- Vraag tonen ---
 vraag_index = st.session_state.vraag
 vraag = st.session_state.quiz[vraag_index]
 img_path = Path(__file__).resolve().parent / "images" / vraag["foto"]
@@ -115,14 +102,14 @@ st.title("🐶 Raad het hondenras")
 st.write(f"Vraag {vraag_index + 1} van 10")
 
 if not img_path.exists():
-    st.error(f"Afbeelding ontbreekt: {img_path.name}")
+    st.error(f"Afbeelding niet gevonden: {img_path.name}")
     st.stop()
 
 st.image(str(img_path), use_container_width=True)
 
 antwoord = st.radio("Wat is het ras?", vraag["opties"], key=f"radio_{vraag_index}")
 
-# --- Vraag nog niet beantwoord ---
+# --- Antwoordverwerking ---
 if vraag_index not in st.session_state.gekozen:
     if st.button("Controleer"):
         st.session_state.gekozen[vraag_index] = antwoord
@@ -150,5 +137,3 @@ if tijdstip_str:
         st.stop()
     else:
         st.stop()
-else:
-    st.stop()
