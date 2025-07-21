@@ -1,9 +1,8 @@
 import streamlit as st
 import random
-from PIL import Image
+import time
 from pathlib import Path
-
-st.set_page_config(page_title="Hondenrassenquiz 🐶", layout="centered")
+from PIL import Image
 
 # --- Configuratie ---
 RASSEN = {
@@ -37,37 +36,68 @@ RASSEN = {
     "whippet.jpg": "Whippet"
 }
 
-# --- Logica ---
-fotos = list(RASSEN.items())
-random.shuffle(fotos)
-quiz = fotos[:10]
+def maak_quiz():
+    items = list(RASSEN.items())
+    random.shuffle(items)
+    quiz = []
+    for foto, juist in items[:10]:
+        opties = random.sample([v for v in RASSEN.values() if v != juist], 3)
+        opties.append(juist)
+        random.shuffle(opties)
+        quiz.append({"foto": foto, "juist": juist, "opties": opties})
+    return quiz
 
-if "antwoorden" not in st.session_state:
-    st.session_state.antwoorden = [""] * 10
-if "score" not in st.session_state:
-    st.session_state.score = None
+# --- Session State ---
+if "quiz" not in st.session_state:
+    st.session_state.quiz = maak_quiz()
+    st.session_state.vraag = 0
+    st.session_state.score = 0
+    st.session_state.resultaat = None
 
+# --- UI ---
 st.title("🐶 Raad het hondenras")
-st.write("Bekijk de afbeelding en typ het juiste ras in. Er zijn 10 vragen.")
+st.write(f"Vraag {st.session_state.vraag + 1} van 10")
 
-for i, (bestand, rasnaam) in enumerate(quiz):
-    st.markdown(f"### Vraag {i+1}/10")
-    img_path = Path("images") / bestand
-    st.image(str(img_path), use_column_width=True)
-    antwoord = st.text_input(f"Wat is het ras? ({i+1})", key=f"antwoord_{i}")
-    st.session_state.antwoorden[i] = antwoord
+vraag = st.session_state.quiz[st.session_state.vraag]
+img_path = Path(__file__).parent / "images" / vraag["foto"]
+st.image(str(img_path), use_column_width=True)
 
-if st.button("Controleer antwoorden"):
-    score = 0
-    for i, (_, juist) in enumerate(quiz):
-        if st.session_state.antwoorden[i].strip().lower() == juist.lower():
-            score += 1
-    st.session_state.score = score
-    st.success(f"🎉 Je haalde {score}/10 goed!")
-    st.code(f"Ik haalde {score}/10 in de hondenrassenquiz! 🐶")
+antwoord = st.radio("Wat is het ras?", vraag["opties"], key=f"vraag_{st.session_state.vraag}")
 
-if st.session_state.score is not None:
-    if st.button("Opnieuw spelen"):
-        st.session_state.antwoorden = [""] * 10
-        st.session_state.score = None
+if st.button("Controleer"):
+    if antwoord == vraag["juist"]:
+        st.success("✅ Goed!")
+        st.session_state.score += 1
+    else:
+        st.error(f"❌ Fout! Het juiste antwoord was: **{vraag['juist']}**")
+
+    st.session_state.resultaat = True
+    st.experimental_rerun()
+
+# Na feedback, wacht 1.5 sec en ga door naar volgende vraag
+if st.session_state.resultaat:
+    time.sleep(1.5)
+    st.session_state.resultaat = None
+    st.session_state.vraag += 1
+    if st.session_state.vraag >= 10:
+        st.experimental_rerun()
+
+# --- Eindscherm ---
+if st.session_state.vraag >= 10:
+    st.header("🎉 Je bent klaar!")
+    score = st.session_state.score
+    st.write(f"Je haalde **{score}/10** goed!")
+
+    if score == 10:
+        st.success("🐾 Jij bent een ultieme hondenkenner!")
+    elif score >= 7:
+        st.info("🐕 Jij houdt duidelijk van honden!")
+    elif score >= 4:
+        st.warning("🐶 Je weet er wat van, maar er is ruimte voor groei.")
+    else:
+        st.error("🐾 Tijd om wat meer hondenrassen te leren kennen!")
+
+    if st.button("Speel opnieuw"):
+        for key in st.session_state.keys():
+            del st.session_state[key]
         st.experimental_rerun()
