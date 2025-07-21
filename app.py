@@ -7,109 +7,101 @@ from PIL import Image
 
 st.set_page_config(page_title="Hondenrassenquiz 🐶", layout="centered")
 
-# --- Stijl injecteren ---
 st.markdown("""
     <style>
-    /* Achtergrond: glitter en hondenpootjes */
+    /* Achtergrond met subtiel hondenpatroon */
     body {
-        background-image: url('https://media.giphy.com/media/3oriO0OEd9QIDdllqo/giphy.gif');
-        background-size: cover;
-        background-attachment: fixed;
-        color: #fff;
+        background-image: url('https://www.transparenttextures.com/patterns/paw-print.png');
+        background-repeat: repeat;
+        background-color: #ffeeff;
+        color: #222;
     }
 
-    /* Centrale container transparant + schaduw */
+    /* Centrale container */
     .stApp {
-        background: rgba(255, 255, 255, 0.05);
+        background: rgba(255, 255, 255, 0.85);
         border-radius: 20px;
         padding: 2rem;
-        box-shadow: 0 0 30px hotpink;
-        animation: pulseBox 3s infinite alternate;
+        box-shadow: 0 0 15px deeppink;
     }
 
-    /* Pulse-effect voor container */
-    @keyframes pulseBox {
-        from { box-shadow: 0 0 20px #ff00ff; }
-        to { box-shadow: 0 0 40px #00ffff; }
-    }
-
-    /* Header */
+    /* Titels */
     h1, h2, h3 {
-        color: #ffcc00;
+        color: #ff66cc;
         font-family: 'Comic Sans MS', cursive;
-        text-shadow: 2px 2px #ff00ff;
-        animation: wobble 2s infinite ease-in-out;
+        text-shadow: 1px 1px #ff00ff;
+        animation: gentleWobble 3s infinite ease-in-out;
     }
 
-    @keyframes wobble {
-        0%, 100% { transform: rotate(-2deg); }
-        50% { transform: rotate(2deg); }
+    @keyframes gentleWobble {
+        0%, 100% { transform: rotate(-1deg); }
+        50% { transform: rotate(1deg); }
     }
 
     /* Antwoordopties */
     .stRadio > div {
-        background: linear-gradient(90deg, #ff99cc, #66ffff);
+        background: linear-gradient(90deg, #fff0f5, #ccf2ff);
         border-radius: 12px;
         padding: 1rem;
         margin: 0.5rem 0;
-        font-size: 1.2rem;
+        font-size: 1.1rem;
         font-weight: bold;
-        color: #000;
-        box-shadow: 0 0 10px #ff00ff;
+        color: #333;
+        box-shadow: 0 0 8px #ffaaff;
         transition: transform 0.2s ease-in-out;
     }
 
     .stRadio > div:hover {
-        transform: scale(1.05);
+        transform: scale(1.04);
     }
 
     /* Knoppen */
     button[kind="primary"] {
-        background: radial-gradient(circle, #ff9900, #ff0000);
-        border-radius: 50px;
-        font-size: 1.5rem;
+        background: radial-gradient(circle, #ffcc00, #ff8800);
+        border-radius: 30px;
+        font-size: 1.3rem;
         font-weight: bold;
         color: white;
-        box-shadow: 0 0 20px #ff6600;
         padding: 1rem 2rem;
-        animation: bounce 1s infinite alternate;
+        box-shadow: 0 0 12px #ff6600;
+        animation: softBounce 1.2s infinite alternate;
     }
 
-    @keyframes bounce {
+    @keyframes softBounce {
         from { transform: translateY(0); }
-        to { transform: translateY(-5px); }
+        to { transform: translateY(-4px); }
     }
 
-    /* Score feedback */
+    /* Feedback (correct/fout) */
     .stSuccess, .stError, .stWarning, .stInfo {
-        font-size: 1.3rem;
+        font-size: 1.2rem;
         font-weight: bold;
         background: repeating-linear-gradient(
             -45deg,
-            #ffff00,
-            #ffff00 10px,
-            #ff00ff 10px,
-            #ff00ff 20px
+            #ffffcc,
+            #ffffcc 10px,
+            #ffccff 10px,
+            #ffccff 20px
         );
-        color: black !important;
+        color: #000 !important;
         padding: 1rem;
         border-radius: 12px;
     }
 
-    /* Afbeelding styling */
+    /* Afbeelding: wiebelen */
     img {
-        border: 6px dashed hotpink;
-        border-radius: 30px;
-        box-shadow: 0 0 20px yellow;
+        border: 4px solid deeppink;
+        border-radius: 20px;
+        box-shadow: 0 0 12px hotpink;
         margin-bottom: 1rem;
-        animation: spinDog 4s linear infinite;
+        animation: subtleWiggle 3s ease-in-out infinite;
     }
 
-    @keyframes spinDog {
-        0% { transform: rotate(0deg); }
-        100% { transform: rotate(360deg); }
+    @keyframes subtleWiggle {
+        0%, 100% { transform: rotate(0deg); }
+        25% { transform: rotate(1deg); }
+        75% { transform: rotate(-1deg); }
     }
-
     </style>
 """, unsafe_allow_html=True)
 
