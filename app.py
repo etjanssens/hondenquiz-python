@@ -110,30 +110,30 @@ st.image(str(img_path), use_container_width=True)
 antwoord = st.radio("Wat is het ras?", vraag["opties"], key=f"radio_{vraag_index}")
 
 # --- Antwoordverwerking ---
-if vraag_index not in st.session_state.gekozen:
+tijdstip_str = st.session_state.tijden.get(vraag_index)
+gekozen = st.session_state.gekozen.get(vraag_index)
+
+if gekozen is None:
     if st.button("Controleer"):
         st.session_state.gekozen[vraag_index] = antwoord
-        st.session_state.tijden[vraag_index] = datetime.now().isoformat()
         st.session_state.gekozen_juist = (antwoord == vraag["juist"])
-        st.session_state.door_naar_feedback = True
-        st.stop()
+        st.session_state.tijden[vraag_index] = datetime.now().isoformat()
+        st.rerun()
     st.stop()
-
-# --- Feedback tonen ---
-gekozen = st.session_state.gekozen[vraag_index]
-juist = vraag["juist"]
-
-if gekozen == juist:
-    st.success("✅ Goed!")
 else:
-    st.error(f"❌ Fout! Het juiste antwoord was: **{juist}**")
+    # --- Feedback tonen ---
+    juist = vraag["juist"]
+    if gekozen == juist:
+        st.success("✅ Goed!")
+    else:
+        st.error(f"❌ Fout! Het juiste antwoord was: **{juist}**")
 
-# --- Automatisch doorgaan na 1.5 seconde ---
-tijdstip_str = st.session_state.tijden.get(vraag_index)
-if tijdstip_str:
+    # --- Automatisch doorgaan na 1.5 seconde ---
     tijdstip = datetime.fromisoformat(tijdstip_str)
     if datetime.now() - tijdstip > timedelta(seconds=1.5):
-        st.session_state.door_naar_volgende = True
-        st.stop()
+        st.session_state.vraag += 1
+        if gekozen == juist:
+            st.session_state.score += 1
+        st.rerun()
     else:
         st.stop()
