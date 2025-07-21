@@ -58,19 +58,25 @@ if "quiz" not in st.session_state:
 st.title("🐶 Raad het hondenras")
 st.write(f"Vraag {st.session_state.vraag + 1} van 10")
 
+from datetime import datetime, timedelta
+
+# --- Toon de vraag ---
 vraag = st.session_state.quiz[st.session_state.vraag]
 img_path = Path(__file__).parent / "images" / vraag["foto"]
 st.image(str(img_path), use_container_width=True)
 
-antwoord = st.radio("Wat is het ras?", vraag["opties"], key=f"vraag_{st.session_state.vraag}")
+antwoord = st.radio("Wat is het ras?", vraag["opties"], key=f"keuze_{st.session_state.vraag}")
 
+# --- Knop controleren ---
 if f"beantwoord_{st.session_state.vraag}" not in st.session_state:
     if st.button("Controleer"):
         st.session_state[f"beantwoord_{st.session_state.vraag}"] = antwoord
+        st.session_state[f"beantwoord_tijd_{st.session_state.vraag}"] = datetime.now().isoformat()
         if antwoord == vraag["juist"]:
             st.session_state.score += 1
         st.experimental_rerun()
 
+# --- Feedback tonen ---
 elif f"beantwoord_{st.session_state.vraag}" in st.session_state:
     gegeven = st.session_state[f"beantwoord_{st.session_state.vraag}"]
     juist = vraag["juist"]
@@ -79,16 +85,10 @@ elif f"beantwoord_{st.session_state.vraag}" in st.session_state:
     else:
         st.error(f"❌ Fout! Het juiste antwoord was: **{juist}**")
 
-    time.sleep(1.5)
-    st.session_state.vraag += 1
-    st.experimental_rerun()
-
-# Na feedback, wacht 1.5 sec en ga door naar volgende vraag
-if st.session_state.resultaat:
-    time.sleep(1.5)
-    st.session_state.resultaat = None
-    st.session_state.vraag += 1
-    if st.session_state.vraag >= 10:
+    # Check of er al 1.5 seconde voorbij is
+    tijdstip = datetime.fromisoformat(st.session_state[f"beantwoord_tijd_{st.session_state.vraag}"])
+    if datetime.now() - tijdstip > timedelta(seconds=1.5):
+        st.session_state.vraag += 1
         st.experimental_rerun()
 
 # --- Eindscherm ---
