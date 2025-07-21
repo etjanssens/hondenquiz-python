@@ -1,5 +1,6 @@
 import streamlit as st
 import random
+import time
 from pathlib import Path
 from datetime import datetime, timedelta
 from PIL import Image
@@ -109,6 +110,8 @@ st.image(str(img_path), use_container_width=True)
 
 antwoord = st.radio("Wat is het ras?", vraag["opties"], key=f"radio_{vraag_index}")
 
+import time  # bovenaan toevoegen als je dat nog niet had
+
 # --- Antwoordverwerking ---
 tijdstip_str = st.session_state.tijden.get(vraag_index)
 gekozen = st.session_state.gekozen.get(vraag_index)
@@ -128,12 +131,15 @@ else:
     else:
         st.error(f"❌ Fout! Het juiste antwoord was: **{juist}**")
 
-    # --- Automatisch doorgaan na 1.5 seconde ---
-    tijdstip = datetime.fromisoformat(tijdstip_str)
-    if datetime.now() - tijdstip > timedelta(seconds=1.5):
-        st.session_state.vraag += 1
-        if gekozen == juist:
-            st.session_state.score += 1
-        st.rerun()
-    else:
-        st.stop()
+    # --- Voortgangsbalk van 1.5 seconde ---
+    progress_bar = st.progress(0, text="Volgende vraag komt eraan...")
+
+    for i in range(100):
+        time.sleep(1.5 / 100)
+        progress_bar.progress(i + 1, text="Volgende vraag komt eraan...")
+
+    # --- Na 1.5s doorgaan ---
+    st.session_state.vraag += 1
+    if gekozen == juist:
+        st.session_state.score += 1
+    st.rerun()
