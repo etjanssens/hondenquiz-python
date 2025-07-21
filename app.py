@@ -8,8 +8,14 @@ st.set_page_config(page_title="Hondenrassenquiz 🐶", layout="centered")
 
 # --- Veilig: initialiseervangnet ---
 if "quiz" not in st.session_state:
-    st.session_state.quiz = []
-    st.stop()
+    st.session_state.quiz = maak_quiz()
+    st.session_state.vraag = 0
+    st.session_state.score = 0
+    st.session_state.gekozen = {}
+    st.session_state.tijden = {}
+    st.session_state.door_naar_volgende = False
+    st.session_state.door_naar_feedback = False
+    st.session_state.gekozen_juist = False
 
 # --- Veilige rerun na score-update ---
 if st.session_state.get("door_naar_feedback"):
