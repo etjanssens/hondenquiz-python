@@ -6,7 +6,14 @@ from PIL import Image
 
 st.set_page_config(page_title="Hondenrassenquiz 🐶", layout="centered")
 
-# --- Veilige rerun direct na state change ---
+# --- Veilige rerun na score-update ---
+if st.session_state.get("door_naar_feedback"):
+    st.session_state.door_naar_feedback = False
+    if st.session_state.get("gekozen_juist"):
+        st.session_state.score += 1
+    st.experimental_rerun()
+
+# --- Veilige doorgang naar volgende vraag ---
 if st.session_state.get("door_naar_volgende"):
     st.session_state.door_naar_volgende = False
     st.session_state.vraag += 1
@@ -64,6 +71,8 @@ if "quiz" not in st.session_state:
     st.session_state.gekozen = {}
     st.session_state.tijden = {}
     st.session_state.door_naar_volgende = False
+    st.session_state.door_naar_feedback = False
+    st.session_state.gekozen_juist = False
 
 # --- Einde quiz ---
 if st.session_state.vraag >= len(st.session_state.quiz):
@@ -101,9 +110,9 @@ if vraag_index not in st.session_state.gekozen:
     if st.button("Controleer"):
         st.session_state.gekozen[vraag_index] = antwoord
         st.session_state.tijden[vraag_index] = datetime.now().isoformat()
-        if antwoord == vraag["juist"]:
-            st.session_state.score += 1
-        st.experimental_rerun()
+        st.session_state.gekozen_juist = (antwoord == vraag["juist"])
+        st.session_state.door_naar_feedback = True
+        st.stop()
     st.stop()
 
 # --- Feedback tonen ---
