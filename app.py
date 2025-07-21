@@ -7,6 +7,112 @@ from PIL import Image
 
 st.set_page_config(page_title="Hondenrassenquiz 🐶", layout="centered")
 
+# --- Stijl injecteren ---
+st.markdown("""
+    <style>
+    /* Achtergrond: glitter en hondenpootjes */
+    body {
+        background-image: url('https://media.giphy.com/media/3oriO0OEd9QIDdllqo/giphy.gif');
+        background-size: cover;
+        background-attachment: fixed;
+        color: #fff;
+    }
+
+    /* Centrale container transparant + schaduw */
+    .stApp {
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 20px;
+        padding: 2rem;
+        box-shadow: 0 0 30px hotpink;
+        animation: pulseBox 3s infinite alternate;
+    }
+
+    /* Pulse-effect voor container */
+    @keyframes pulseBox {
+        from { box-shadow: 0 0 20px #ff00ff; }
+        to { box-shadow: 0 0 40px #00ffff; }
+    }
+
+    /* Header */
+    h1, h2, h3 {
+        color: #ffcc00;
+        font-family: 'Comic Sans MS', cursive;
+        text-shadow: 2px 2px #ff00ff;
+        animation: wobble 2s infinite ease-in-out;
+    }
+
+    @keyframes wobble {
+        0%, 100% { transform: rotate(-2deg); }
+        50% { transform: rotate(2deg); }
+    }
+
+    /* Antwoordopties */
+    .stRadio > div {
+        background: linear-gradient(90deg, #ff99cc, #66ffff);
+        border-radius: 12px;
+        padding: 1rem;
+        margin: 0.5rem 0;
+        font-size: 1.2rem;
+        font-weight: bold;
+        color: #000;
+        box-shadow: 0 0 10px #ff00ff;
+        transition: transform 0.2s ease-in-out;
+    }
+
+    .stRadio > div:hover {
+        transform: scale(1.05);
+    }
+
+    /* Knoppen */
+    button[kind="primary"] {
+        background: radial-gradient(circle, #ff9900, #ff0000);
+        border-radius: 50px;
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: white;
+        box-shadow: 0 0 20px #ff6600;
+        padding: 1rem 2rem;
+        animation: bounce 1s infinite alternate;
+    }
+
+    @keyframes bounce {
+        from { transform: translateY(0); }
+        to { transform: translateY(-5px); }
+    }
+
+    /* Score feedback */
+    .stSuccess, .stError, .stWarning, .stInfo {
+        font-size: 1.3rem;
+        font-weight: bold;
+        background: repeating-linear-gradient(
+            -45deg,
+            #ffff00,
+            #ffff00 10px,
+            #ff00ff 10px,
+            #ff00ff 20px
+        );
+        color: black !important;
+        padding: 1rem;
+        border-radius: 12px;
+    }
+
+    /* Afbeelding styling */
+    img {
+        border: 6px dashed hotpink;
+        border-radius: 30px;
+        box-shadow: 0 0 20px yellow;
+        margin-bottom: 1rem;
+        animation: spinDog 4s linear infinite;
+    }
+
+    @keyframes spinDog {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+
+    </style>
+""", unsafe_allow_html=True)
+
 # --- Quiz genereren ---
 def maak_quiz():
     RASSEN = {
