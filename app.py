@@ -11,7 +11,7 @@ st.markdown("""
     <style>
     /* Achtergrond met subtiel hondenpatroon */
     body {
-        background-image: url('https://www.transparenttextures.com/patterns/paw-print.png');
+        background-image: url('https://static.vecteezy.com/system/resources/previews/006/431/803/non_2x/seamless-dog-pattern-with-paw-prints-and-hearts-cat-foot-texture-pattern-with-doggy-pawprint-and-hearts-dog-texture-hand-drawn-illustration-in-doodle-style-on-white-background-vector.jpg');
         background-repeat: repeat;
         background-color: #ffeeff;
         color: #222;
