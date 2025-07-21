@@ -6,6 +6,12 @@ from PIL import Image
 
 st.set_page_config(page_title="Hondenrassenquiz 🐶", layout="centered")
 
+# --- Veilige rerun direct na state change ---
+if st.session_state.get("door_naar_volgende"):
+    st.session_state.door_naar_volgende = False
+    st.session_state.vraag += 1
+    st.experimental_rerun()
+
 # --- Hondenrassen ---
 RASSEN = {
     "akita.jpg": "Akita Inu",
@@ -57,6 +63,7 @@ if "quiz" not in st.session_state:
     st.session_state.score = 0
     st.session_state.gekozen = {}
     st.session_state.tijden = {}
+    st.session_state.door_naar_volgende = False
 
 # --- Einde quiz ---
 if st.session_state.vraag >= len(st.session_state.quiz):
@@ -113,8 +120,8 @@ tijdstip_str = st.session_state.tijden.get(vraag_index)
 if tijdstip_str:
     tijdstip = datetime.fromisoformat(tijdstip_str)
     if datetime.now() - tijdstip > timedelta(seconds=1.5):
-        st.session_state.vraag += 1
-        st.experimental_rerun()
+        st.session_state.door_naar_volgende = True
+        st.stop()
     else:
         st.stop()
 else:
