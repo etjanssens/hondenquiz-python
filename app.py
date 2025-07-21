@@ -60,7 +60,7 @@ st.write(f"Vraag {st.session_state.vraag + 1} van 10")
 
 vraag = st.session_state.quiz[st.session_state.vraag]
 img_path = Path(__file__).parent / "images" / vraag["foto"]
-st.image(str(img_path), use_column_width=True)
+st.image(str(img_path), use_container_width=True)
 
 antwoord = st.radio("Wat is het ras?", vraag["opties"], key=f"vraag_{st.session_state.vraag}")
 
