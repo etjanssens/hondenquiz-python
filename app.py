@@ -55,7 +55,8 @@ if "quiz" not in st.session_state:
     st.session_state.quiz = maak_quiz()
     st.session_state.vraag = 0
     st.session_state.score = 0
-    st.session_state.feedback_tijd = None
+    st.session_state.gekozen = {}
+    st.session_state.tijden = {}
 
 # --- Einde quiz ---
 if st.session_state.vraag >= len(st.session_state.quiz):
@@ -77,7 +78,7 @@ if st.session_state.vraag >= len(st.session_state.quiz):
         st.experimental_rerun()
     st.stop()
 
-# --- Huidige vraag ophalen ---
+# --- Huidige vraag ---
 vraag_index = st.session_state.vraag
 vraag = st.session_state.quiz[vraag_index]
 img_path = Path(__file__).parent / "images" / vraag["foto"]
@@ -89,17 +90,17 @@ st.image(str(img_path), use_container_width=True)
 antwoord = st.radio("Wat is het ras?", vraag["opties"], key=f"radio_{vraag_index}")
 
 # --- Vraag nog niet beantwoord ---
-if f"gekozen_{vraag_index}" not in st.session_state:
+if vraag_index not in st.session_state.gekozen:
     if st.button("Controleer"):
-        st.session_state[f"gekozen_{vraag_index}"] = antwoord
-        st.session_state[f"tijd_{vraag_index}"] = datetime.now().isoformat()
+        st.session_state.gekozen[vraag_index] = antwoord
+        st.session_state.tijden[vraag_index] = datetime.now().isoformat()
         if antwoord == vraag["juist"]:
             st.session_state.score += 1
         st.experimental_rerun()
     st.stop()
 
 # --- Feedback tonen ---
-gekozen = st.session_state[f"gekozen_{vraag_index}"]
+gekozen = st.session_state.gekozen[vraag_index]
 juist = vraag["juist"]
 
 if gekozen == juist:
@@ -107,10 +108,14 @@ if gekozen == juist:
 else:
     st.error(f"❌ Fout! Het juiste antwoord was: **{juist}**")
 
-# --- Ga pas na 1.5s door ---
-tijdstip = datetime.fromisoformat(st.session_state[f"tijd_{vraag_index}"])
-if datetime.now() - tijdstip > timedelta(seconds=1.5):
-    st.session_state.vraag += 1
-    st.experimental_rerun()
+# --- Automatisch doorgaan na 1.5 seconde ---
+tijdstip_str = st.session_state.tijden.get(vraag_index)
+if tijdstip_str:
+    tijdstip = datetime.fromisoformat(tijdstip_str)
+    if datetime.now() - tijdstip > timedelta(seconds=1.5):
+        st.session_state.vraag += 1
+        st.experimental_rerun()
+    else:
+        st.stop()
 else:
     st.stop()
