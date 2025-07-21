@@ -6,18 +6,23 @@ from PIL import Image
 
 st.set_page_config(page_title="Hondenrassenquiz 🐶", layout="centered")
 
+# --- Veilig: initialiseervangnet ---
+if "quiz" not in st.session_state:
+    st.session_state.quiz = []
+    st.stop()
+
 # --- Veilige rerun na score-update ---
 if st.session_state.get("door_naar_feedback"):
     st.session_state.door_naar_feedback = False
     if st.session_state.get("gekozen_juist"):
         st.session_state.score += 1
-    st.experimental_rerun()
+    st.rerun()
 
 # --- Veilige doorgang naar volgende vraag ---
 if st.session_state.get("door_naar_volgende"):
     st.session_state.door_naar_volgende = False
     st.session_state.vraag += 1
-    st.experimental_rerun()
+    st.rerun()
 
 # --- Hondenrassen ---
 RASSEN = {
@@ -51,7 +56,7 @@ RASSEN = {
     "whippet.jpg": "Whippet"
 }
 
-# --- Quiz genereren ---
+# --- Quiz genereren (alleen bij eerste run) ---
 def maak_quiz():
     items = list(RASSEN.items())
     random.shuffle(items)
@@ -63,8 +68,8 @@ def maak_quiz():
         quiz.append({"foto": foto, "juist": juist, "opties": opties})
     return quiz
 
-# --- Initialiseer sessie ---
-if "quiz" not in st.session_state:
+# --- Eerste initialisatie ---
+if not st.session_state.quiz:
     st.session_state.quiz = maak_quiz()
     st.session_state.vraag = 0
     st.session_state.score = 0
@@ -73,6 +78,7 @@ if "quiz" not in st.session_state:
     st.session_state.door_naar_volgende = False
     st.session_state.door_naar_feedback = False
     st.session_state.gekozen_juist = False
+    st.rerun()
 
 # --- Einde quiz ---
 if st.session_state.vraag >= len(st.session_state.quiz):
@@ -91,16 +97,21 @@ if st.session_state.vraag >= len(st.session_state.quiz):
 
     if st.button("Speel opnieuw"):
         st.session_state.clear()
-        st.experimental_rerun()
+        st.rerun()
     st.stop()
 
 # --- Huidige vraag ---
 vraag_index = st.session_state.vraag
 vraag = st.session_state.quiz[vraag_index]
-img_path = Path(__file__).parent / "images" / vraag["foto"]
+img_path = Path(__file__).resolve().parent / "images" / vraag["foto"]
 
 st.title("🐶 Raad het hondenras")
 st.write(f"Vraag {vraag_index + 1} van 10")
+
+if not img_path.exists():
+    st.error(f"Afbeelding ontbreekt: {img_path.name}")
+    st.stop()
+
 st.image(str(img_path), use_container_width=True)
 
 antwoord = st.radio("Wat is het ras?", vraag["opties"], key=f"radio_{vraag_index}")
