@@ -99,17 +99,18 @@ if f"antwoord_ingediend_{vraag_index}" not in st.session_state:
 st.experimental_rerun()
 st.stop()
 
-# --- Feedback tonen + automatisch doorgaan ---
-elif f"antwoord_ingediend_{vraag_index}" in st.session_state:
-    gekozen = st.session_state[f"antwoord_gekozen_{vraag_index}"]
-    juist = vraag["juist"]
-    if gekozen == juist:
-        st.success("✅ Goed!")
-    else:
-        st.error(f"❌ Fout! Het juiste antwoord was: **{juist}**")
+# --- Feedback tonen ---
+gekozen = st.session_state[f"antwoord_gekozen_{vraag_index}"]
+juist = vraag["juist"]
+if gekozen == juist:
+    st.success("✅ Goed!")
+else:
+    st.error(f"❌ Fout! Het juiste antwoord was: **{juist}**")
 
-    tijdstip = datetime.fromisoformat(st.session_state[f"tijdstip_{vraag_index}"])
+# --- Automatisch doorgaan na 1.5 seconde ---
+tijdstip = datetime.fromisoformat(st.session_state[f"tijdstip_{vraag_index}"])
 if datetime.now() - tijdstip > timedelta(seconds=1.5):
     st.session_state.vraag += 1
     st.experimental_rerun()
-    st.stop()
+
+# (Let op: géén elif of verdere code na deze if-blok!)
