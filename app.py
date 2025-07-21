@@ -96,7 +96,8 @@ if f"antwoord_ingediend_{vraag_index}" not in st.session_state:
         st.session_state[f"tijdstip_{vraag_index}"] = datetime.now().isoformat()
         if antwoord == vraag["juist"]:
             st.session_state.score += 1
-        st.experimental_rerun()
+st.experimental_rerun()
+st.stop()
 
 # --- Feedback tonen + automatisch doorgaan ---
 elif f"antwoord_ingediend_{vraag_index}" in st.session_state:
@@ -108,6 +109,7 @@ elif f"antwoord_ingediend_{vraag_index}" in st.session_state:
         st.error(f"❌ Fout! Het juiste antwoord was: **{juist}**")
 
     tijdstip = datetime.fromisoformat(st.session_state[f"tijdstip_{vraag_index}"])
-    if datetime.now() - tijdstip > timedelta(seconds=1.5):
-        st.session_state.vraag += 1
-        st.experimental_rerun()
+if datetime.now() - tijdstip > timedelta(seconds=1.5):
+    st.session_state.vraag += 1
+    st.experimental_rerun()
+    st.stop()
